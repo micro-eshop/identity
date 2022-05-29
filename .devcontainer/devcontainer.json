@@ -13,7 +13,11 @@
 		"vscode": {
 			// Add the IDs of extensions you want installed when the container is created.
 			"extensions": [
-				"dbaeumer.vscode-eslint"
+				"dbaeumer.vscode-eslint",
+				"GitHub.copilot",
+				"wakatime.vscode-wakatime",
+				"ckolkman.vscode-postgres",
+				"humao.rest-client"
 			]
 		}
 	},
