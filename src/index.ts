@@ -1,23 +1,13 @@
-import { fastify } from "fastify";
-import pino from 'pino';
+import express from "express"
+import pino from "pino"
+import express_pino from "express-pino-logger"
 
-// Require the framework and instantiate it
-const server = fastify({
-    logger: pino({ level: 'info' })
+const app = express()
+
+app.use(express_pino({logger: pino({level: "debug"})}))
+
+app.get('/', async function (req, res) {
+  res.send('hello world2')
 })
 
-// Declare a route
-server.get('/', async (request, reply) => {
-  return { hello: 'world' }
-})
-
-// Run the server!
-const start = async () => {
-  try {
-    await server.listen(3000)
-  } catch (err) {
-    server.log.error(err)
-    process.exit(1)
-  }
-}
-start()
+app.listen(3000)
