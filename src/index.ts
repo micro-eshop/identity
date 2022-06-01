@@ -7,20 +7,29 @@ import fake from "./infrastructure/auth/fake"
 import jwt from 'jsonwebtoken';
 
 const app = express()
-passport.use(fake())
+passport.use("login", fake())
 app.use(body_parser.urlencoded({ extended: true }));
+app.use(body_parser.json());
 app.use(express_pino({logger: pino({level: "debug"})}))
 
+function errorHandler (err: any, req: any, res: any, next: any) {
+  if (res.headersSent) {
+    return next(err)
+  }
+  res.status(500)
+  res.render('error', { error: err })
+}
+app.use(errorHandler)
 app.post(
   '/login',
   async (req, res, next) => {
+    console.log(req.body)
     passport.authenticate(
       'login',
       async (err, user, info) => {
         try {
           if (err || !user) {
-            const error = new Error('An error occurred.');
-
+            const error = new Error(`An error occurred.`);
             return next(error);
           }
 
