@@ -1,57 +1,11 @@
-import express from "express"
-import pino from "pino"
-import express_pino from "express-pino-logger"
-import body_parser from "body-parser"
-import passport from "passport"
-import fake from "./infrastructure/auth/fake"
-import jwt from 'jsonwebtoken';
+import starup from "./api/starup";
 
-const app = express()
-passport.use("login", fake())
-app.use(body_parser.urlencoded({ extended: true }));
-app.use(body_parser.json());
-app.use(express_pino({logger: pino({level: "debug"})}))
-
-function errorHandler (err: any, req: any, res: any, next: any) {
-  if (res.headersSent) {
-    return next(err)
+(async () => {
+  try {
+      var app = await starup();
+      app.listen(3000)
+  } catch (e) {
+      console.error(e)
   }
-  res.status(500)
-  res.render('error', { error: err })
-}
-app.use(errorHandler)
-app.post(
-  '/login',
-  async (req, res, next) => {
-    console.log(req.body)
-    passport.authenticate(
-      'login',
-      async (err, user, info) => {
-        try {
-          console.log(user)
-          if (err || !user) {
-            res.statusCode = 400;
-            res.json({ error: 'Invalid username or password' });
-            return;
-          }
-
-          req.login(
-            user,
-            { session: false },
-            async (error) => {
-              if (error) return next(error);
-              const body = { _id: user._id, email: user.email };
-              const token = jwt.sign({ user: body }, 'TOP_SECRET');
-
-              return res.json({ token });
-            }
-          );
-        } catch (error) {
-          return next(error);
-        }
-      }
-    )(req, res, next);
-  }
-);
-
-app.listen(3000)
+  // `text` is not available here
+})();
