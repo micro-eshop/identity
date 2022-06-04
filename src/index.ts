@@ -28,9 +28,11 @@ app.post(
       'login',
       async (err, user, info) => {
         try {
+          console.log(user)
           if (err || !user) {
-            const error = new Error(`An error occurred.`);
-            return next(error);
+            res.statusCode = 400;
+            res.json({ error: 'Invalid username or password' });
+            return;
           }
 
           req.login(

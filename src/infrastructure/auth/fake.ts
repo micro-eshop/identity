@@ -5,6 +5,6 @@ export default function () {
         if (username === 'test' && password === 'test') {
             return done(null, { username });
         }
-        return done(null, false);
+        return done(null, null);
     })
 }

@@ -8,5 +8,5 @@ Accept: application/json
 
 {
     "username": "test",
-    "password": "test"
+    "password": "test2"
 }
