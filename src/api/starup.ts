@@ -5,12 +5,11 @@ import body_parser from "body-parser"
 import passport from "passport"
 import fake from "../infrastructure/auth/fake"
 import jwt from 'jsonwebtoken';
+import { connect, seed } from "../infrastructure/auth/postgres"
 
 export default async function () : Promise<Application> {
-    // const { Sequelize } = require('@sequelize/core');
-    // const sequelize = new Sequelize({ dialect: 'sqlite' });
-    
-    // await sequelize.authenticate();
+    const postgresConnection = await connect(process.env.POSTGRES_CONN ?? 'postgres://postgres:postgres@db:5432/postgres')
+    seed(postgresConnection)
     const app = express()
     passport.use("login", fake())
     app.use(body_parser.urlencoded({ extended: true }));
