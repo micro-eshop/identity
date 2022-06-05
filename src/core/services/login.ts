@@ -1,3 +1,6 @@
+import { UserReader } from "../repository/user";
+import { TokenGenerator } from "./token";
+
 export interface SuccessLoginResult {
     kind: 'success';
     username: string;
@@ -16,17 +19,19 @@ export interface IncorrectPasswordResult {
 
 export type LoginResult = SuccessLoginResult | UserNotFoundResult | IncorrectPasswordResult;
 
-export function login(findUser: (username: string) => Promise<User | null>, hashPassword: (password: string, salt: string) => Promise<string>, generateToken: (user: User) => Promise<string>) {
-    return async (username: string, password: string): Promise<LoginResult>  => {
-        const user = await findUser(username);
+export class LoginService {
+    constructor(private readonly userReader: UserReader, private readonly tokenGenerator: TokenGenerator, private readonly hashPassword: (password: string, salt: string) => Promise<string>) { }
+    
+    async login(username: string, password: string): Promise<LoginResult> {
+        const user = await this.userReader.findUser(username);
         if (user === null) {
             return { kind: 'user-not-found' };
         }
-        const hash = await hashPassword(password, user.salt);
+        const hash = await this.hashPassword(password, user.salt);
         if (hash !== user.password) {
             return { kind: 'incorrect-password' };
         }
-        const token = await generateToken(user);
+        const token = await this.tokenGenerator.generate(user);
         return { kind: 'success', username: user.username, token: token, sessionId: '', userid: user.userId };
     }
 }

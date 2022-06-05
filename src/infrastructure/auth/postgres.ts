@@ -1,5 +1,6 @@
 import { DataTypes, InferAttributes, InferCreationAttributes, Model, Sequelize } from '@sequelize/core';
 import { v4 as uuid } from 'uuid';
+import { UserReader } from '../../core/repository/user';
 import { genSalt, hashPassword } from './password';
 
 
@@ -42,12 +43,18 @@ export async function connect(connectionString: string): Promise<Sequelize> {
       return sequelize;
 }
 
-export async function findUserByUsername(username: string) : Promise<User | null> {
-        const user = await UserModel.findOne({ limit: 1, where: { username: 'test' } });
+export class PostgresUserReader implements UserReader {
+    constructor(private sequelize: Sequelize) {}
+    
+    async findUser(username: string): Promise<User | null> {
+        const user = await UserModel.findOne({ limit: 1, where: { username: username } });
         if (user !== null) {
             return user.mapToUser();
         }
         return null;
+    }
+
+    
 }
 
 
