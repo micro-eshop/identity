@@ -11,6 +11,18 @@ class UserModel extends Model<InferAttributes<UserModel>, InferCreationAttribute
     declare salt: string;
     declare createdAt: Date;
     declare updatedAt: Date;
+
+    mapToUser() : User {
+        return {
+            userId: this.userId,
+            username: this.username,
+            email: this.email,
+            password: this.password,
+            salt: this.salt,
+            createdAt: this.createdAt,
+            updatedAt: this.updatedAt
+        }
+    }
   }
 
 export async function connect(connectionString: string): Promise<Sequelize> {
@@ -28,6 +40,14 @@ export async function connect(connectionString: string): Promise<Sequelize> {
 
       sequelize.sync();
       return sequelize;
+}
+
+export async function findUserByUsername(username: string) : Promise<User | null> {
+        const user = await UserModel.findOne({ limit: 1, where: { username: 'test' } });
+        if (user !== null) {
+            return user.mapToUser();
+        }
+        return null;
 }
 
 
