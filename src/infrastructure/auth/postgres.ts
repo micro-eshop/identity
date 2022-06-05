@@ -33,7 +33,7 @@ export async function connect(connectionString: string): Promise<Sequelize> {
 
 export async function seed(db: Sequelize) {
     const defaultUser = await UserModel.findOne({ limit: 1, where: { username: 'test' } });
-    if(defaultUser === null ){
+    if(defaultUser === null){
         const salt = await genSalt()
         const password = await hashPassword('test', salt)
         await UserModel.create({userId: uuid(), username: 'test', email: 'test@test.pl', password:password, salt: salt, createdAt: new Date(new Date().toUTCString()), updatedAt: new Date(new Date().toUTCString())})

@@ -1,10 +1,9 @@
 import {Strategy} from 'passport-local'
+import { LoginResult } from '../../core/services/login';
 
-export default function () {
-    return new Strategy({usernameField: "username", passwordField: "password"}, function (username, password, done) {
-        if (username === 'test' && password === 'test') {
-            return done(null, { username });
-        }
-        return done(null, null);
+export default function (loginUser: (username: string, password: string) => Promise<LoginResult>) {
+    return new Strategy({usernameField: "username", passwordField: "password"}, async function (username, password, done) {
+        const resutlt = await loginUser(username, password)
+        return done(null, resutlt)
     })
 }
