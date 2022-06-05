@@ -12,11 +12,16 @@ import { hashPassword } from "../infrastructure/auth/password"
 import jwt from "../infrastructure/token/jwt"
 import { Strategy } from "passport-local"
 
+export interface AuthApi {
+    app: Application
+    sequelize: Sequelize
+}
+
 function createloginStrategy() : Strategy {
     return fake(login(findUserByUsername, hashPassword, jwt(process.env.SECRET_KET ?? "jp2gmd2137")))
 }
 
-export default async function (): Promise<Application> {
+export default async function (): Promise<AuthApi> {
     const postgresConnection = await connect(process.env.POSTGRES_CONN ?? 'postgres://postgres:postgres@db:5432/postgres')
     seed(postgresConnection)
     const app = express()
@@ -35,5 +40,5 @@ export default async function (): Promise<Application> {
     app.use(errorHandler)
     loginhandler({ app })
 
-    return app;
+    return { app: app, sequelize: postgresConnection };
 }
