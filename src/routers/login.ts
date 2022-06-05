@@ -10,7 +10,6 @@ export default function (root: CompositionRoot) {
     root.app.post(
         '/login',
         async (req, res, next) => {
-            console.log(req.body)
             passport.authenticate(
                 'login',
                 async (err, user: LoginResult, info) => {

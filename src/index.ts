@@ -1,14 +1,19 @@
+import pino from "pino";
 import starup from "./api/starup";
 
 (async () => {
+  let logger = pino({ level: process.env.NODE_ENV === "production" ? "warn" : "debug" });
   try {
-    var { app, sequelize } = await starup();
+    const { app, sequelize, logger: log } = await starup();
+    logger = log;
     app.on("close", () => {
+      logger.info("Closing server");
+      logger.info("Closing database connection");
       sequelize.close()
+
     })
     app.listen(3000)
   } catch (e) {
-    console.error(e)
+    logger.error(e);
   }
-  // `text` is not available here
 })();

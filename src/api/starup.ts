@@ -4,17 +4,18 @@ import express_pino from "express-pino-logger"
 import body_parser from "body-parser"
 import passport from "passport"
 import strategy from "../infrastructure/auth/fake"
-import { connect, PostgresUserReader, seed } from "../infrastructure/auth/postgres"
-import { LoginService, LoginResult } from "../core/services/login"
+import { connect, PostgresUserReader, PostgresUserWriter, seed } from "../infrastructure/auth/postgres"
+import { LoginService } from "../core/services/login"
 import loginhandler from "../routers/login"
 import { Sequelize } from "@sequelize/core/types"
-import { hashPassword } from "../infrastructure/auth/password"
+import { genSalt, hashPassword } from "../infrastructure/auth/password"
 import {JwtTokenGenerator} from "../infrastructure/token/jwt"
 import { Strategy } from "passport-local"
 
 export interface AuthApi {
     app: Application
     sequelize: Sequelize
+    logger: pino.Logger
 }
 
 function createloginStrategy(sq: Sequelize) : Strategy {
@@ -25,8 +26,11 @@ function createloginStrategy(sq: Sequelize) : Strategy {
 }
 
 export default async function (): Promise<AuthApi> {
-    const postgresConnection = await connect(process.env.POSTGRES_CONN ?? 'postgres://postgres:postgres@db:5432/postgres')
-    seed(postgresConnection)
+    const logger = pino({ level: process.env.NODE_ENV === "production" ? "warn" : "debug" });
+    const postgresConnection = await connect(process.env.POSTGRES_CONN ?? 'postgres://postgres:postgres@db:5432/postgres', logger)
+    const reader = new PostgresUserReader(postgresConnection)
+    const writer = new PostgresUserWriter(postgresConnection, genSalt, hashPassword)
+    await seed(reader, writer)
     const app = express()
     passport.use("login", createloginStrategy(postgresConnection))
     app.use(body_parser.urlencoded({ extended: true }));
@@ -43,5 +47,5 @@ export default async function (): Promise<AuthApi> {
     app.use(errorHandler)
     loginhandler({ app })
 
-    return { app: app, sequelize: postgresConnection };
+    return { app: app, sequelize: postgresConnection, logger: logger };
 }
