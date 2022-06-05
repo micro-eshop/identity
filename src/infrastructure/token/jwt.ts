@@ -6,8 +6,8 @@ export class JwtTokenGenerator implements TokenGenerator {
     constructor(private secret: string) {
     }
 
-    async generate(usr: User): Promise<string> {
-        return jwt.sign({ username: usr.username, sub: usr.userId }, this.secret, { expiresIn: '2h', algorithm: "HS512", });
+    async generate({ userId, username}: { username: string, userId: string}): Promise<string> {
+        return jwt.sign({ username: username, sub: userId }, this.secret, { expiresIn: '2h', algorithm: "HS512", });
     }
 
 }
