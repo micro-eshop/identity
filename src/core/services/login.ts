@@ -31,7 +31,7 @@ export class LoginService {
         if (hash !== user.password) {
             return { kind: 'incorrect-password' };
         }
-        const token = await this.tokenGenerator.generate(user);
+        const token = this.tokenGenerator.generate(user);
         return { kind: 'success', username: user.username, token: token, sessionId: '', userid: user.userId };
     }
 }

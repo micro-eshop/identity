@@ -1,4 +1,4 @@
 
 export interface TokenGenerator {
-    generate(user: User): Promise<string>;
+    generate(user: User): string;
 }
